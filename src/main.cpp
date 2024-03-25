@@ -116,17 +116,11 @@ void splitChangeMonitor(std::string value)
 {
     changeMonitor(false, value);
 }
-void mapWorkspacesToMonitors()
+void mapWorkspacesToMonitors(int keepFocused, int workspaceCount)
 {
     g_vMonitorWorkspaceMap.clear();
 
     int workspaceIndex = 1;
-
-    static auto* const workspaceCountPtr = (Hyprlang::INT* const*)HyprlandAPI::getConfigValue(PHANDLE, k_workspaceCount)->getDataStaticPtr();
-    static auto* const keepFocusedPtr = (Hyprlang::INT* const*)HyprlandAPI::getConfigValue(PHANDLE, k_keepFocused)->getDataStaticPtr();
-
-    int keepFocused = **keepFocusedPtr;
-    int workspaceCount = **workspaceCountPtr;
 
     for (auto& monitor : g_pCompositor->m_vMonitors) {
         std::string logMessage =
@@ -154,7 +148,7 @@ void mapWorkspacesToMonitors()
 
 void refreshMapping(void*, SCallbackInfo&, std::any)
 {
-    mapWorkspacesToMonitors();
+    mapWorkspacesToMonitors(g_sms_keepFocused, g_sms_workspaceCount);
 }
 
 // Do NOT change this function.
@@ -177,8 +171,15 @@ APICALL EXPORT PLUGIN_DESCRIPTION_INFO PLUGIN_INIT(HANDLE handle)
     HyprlandAPI::addDispatcher(PHANDLE, "split-changemonitorsilent", splitChangeMonitorSilent);
 
     HyprlandAPI::reloadConfig();
+    g_pConfigManager->tick();
 
-    mapWorkspacesToMonitors();
+    static auto* const workspaceCountPtr = (Hyprlang::INT* const*)HyprlandAPI::getConfigValue(PHANDLE, k_workspaceCount)->getDataStaticPtr();
+    static auto* const keepFocusedPtr = (Hyprlang::INT* const*)HyprlandAPI::getConfigValue(PHANDLE, k_keepFocused)->getDataStaticPtr();
+
+    g_sms_keepFocused = **keepFocusedPtr;
+    g_sms_workspaceCount = **workspaceCountPtr;
+
+    mapWorkspacesToMonitors(g_sms_keepFocused, g_sms_workspaceCount);
 
     HyprlandAPI::addNotification(PHANDLE, "[split-monitor-workspaces] Initialized successfully!", s_pluginColor, 5000);
 
