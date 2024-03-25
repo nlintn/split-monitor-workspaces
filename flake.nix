@@ -56,7 +56,7 @@
         name = "split-monitor-workspaces";
 
         nativeBuildInputs = with pkgs; [
-          clang-tools_16
+          clang-tools_17
           bear
         ];
 
