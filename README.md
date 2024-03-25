@@ -110,6 +110,8 @@ The plugin provides drop-in replacements for workspace-related commands
 | movetoworkspace       | split-movetoworkspace         |
 | movetoworkspacesilent | split-movetoworkspacesilent   |
 
+These new commands can also take arguments in form of e.g. `w+1`, `w-1` or `w+3` (relative workspace on monitor including empty workspaces with wraparound).
+
 And two new ones, to move windows between monitors
 
 | Normal                    | Arguments         |

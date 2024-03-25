@@ -27,21 +27,55 @@ static HOOK_CALLBACK_FN* e_monitorRemovedHandle = nullptr;
 const std::string& getWorkspaceFromMonitor(CMonitor* monitor, const std::string& workspace)
 {
     int workspaceIndex = 0;
-    try {
-        // convert to 0-indexed int
-        workspaceIndex = std::stoi(workspace) - 1;
-    }
-    catch (std::invalid_argument&) {
-        Debug::log(WARN, "Invalid workspace index: %s", workspace.c_str());
-        return workspace;
-    }
 
-    if (workspaceIndex < 0) {
-        return workspace;
-    }
+    if (workspace.size() >= 3 && workspace[0] == 'w') {
+        int currWorkspaceIndex;
+        try {
+            // convert to 0-indexed int
+            currWorkspaceIndex = std::stoi(g_pCompositor->getWorkspaceByID(monitor->activeWorkspace)->m_szName) - 1;
+        }
+        catch (std::invalid_argument&) {
+            Debug::log(WARN, "Invalid currently active workspace index");
+            return workspace;
+        }
 
-    if ((size_t)workspaceIndex >= g_vMonitorWorkspaceMap[monitor->ID].size()) {
-        return workspace;
+        int relativeWorkspaceIndex;
+        try {
+            relativeWorkspaceIndex = std::stoi(workspace.substr(2, std::string::npos));
+        }
+        catch (std::invalid_argument&) {
+            Debug::log(WARN, "Invalid relative workspace index: %s", workspace.c_str());
+            return workspace;
+        }
+    
+        if (workspace[1] == '+') {
+            workspaceIndex = (currWorkspaceIndex + relativeWorkspaceIndex) % g_sms_workspaceCount;
+        } else if (workspace[1] == '-') {
+            workspaceIndex = (currWorkspaceIndex - relativeWorkspaceIndex) % g_sms_workspaceCount;
+            if (workspaceIndex < 0) {
+                workspaceIndex += g_sms_workspaceCount;
+            }
+        } else {
+            Debug::log(WARN, "Invalid relative workspace index: %s", workspace.c_str());
+            return workspace;
+        }
+    } else {
+        try {
+            // convert to 0-indexed int
+            workspaceIndex = std::stoi(workspace) - 1;
+        }
+        catch (std::invalid_argument&) {
+            Debug::log(WARN, "Invalid workspace index: %s", workspace.c_str());
+            return workspace;
+        }
+
+        if (workspaceIndex < 0) {
+            return workspace;
+        }
+
+        if ((size_t)workspaceIndex >= g_vMonitorWorkspaceMap[monitor->ID].size()) {
+            return workspace;
+        }
     }
 
     return g_vMonitorWorkspaceMap[monitor->ID][workspaceIndex];
