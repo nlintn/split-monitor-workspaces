@@ -32,7 +32,7 @@ const std::string& getWorkspaceFromMonitor(CMonitor* monitor, const std::string&
         int currWorkspaceIndex;
         try {
             // convert to 0-indexed int
-            currWorkspaceIndex = std::stoi(g_pCompositor->getWorkspaceByID(monitor->activeWorkspace)->m_szName) - 1;
+            currWorkspaceIndex = std::stoi(monitor->activeWorkspace->m_szName) - 1;
         }
         catch (std::invalid_argument&) {
             Debug::log(WARN, "Invalid currently active workspace index");
@@ -131,7 +131,7 @@ void changeMonitor(bool quiet, std::string value)
 
     nextMonitor = g_pCompositor->m_vMonitors[nextMonitorIndex].get();
 
-    int nextWorkspace = nextMonitor->activeWorkspace;
+    int nextWorkspace = nextMonitor->activeWorkspace->m_iID;
 
     if (quiet) {
         HyprlandAPI::invokeHyprctlCommand("dispatch", "movetoworkspacesilent " + std::to_string(nextWorkspace));
@@ -166,7 +166,7 @@ void mapWorkspacesToMonitors(int keepFocused, int workspaceCount)
             std::string workspaceName = std::to_string(i);
             g_vMonitorWorkspaceMap[monitor->ID].push_back(workspaceName);
             HyprlandAPI::invokeHyprctlCommand("keyword", "workspace " + workspaceName + "," + monitor->szName);
-            CWorkspace* workspace = g_pCompositor->getWorkspaceByName(workspaceName);
+            PHLWORKSPACE workspace = g_pCompositor->getWorkspaceByName(workspaceName);
 
             if (workspace != nullptr) {
                 g_pCompositor->moveWorkspaceToMonitor(workspace, monitor.get());
