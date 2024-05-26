@@ -1,6 +1,6 @@
 {
   inputs = {
-    hyprland.url = "github:hyprwm/Hyprland";
+    hyprland.url = "git+https://github.com/hyprwm/hyprland?submodules=1";
     nix-filter.url = "github:numtide/nix-filter";
   };
 
@@ -56,7 +56,7 @@
         name = "split-monitor-workspaces";
 
         nativeBuildInputs = with pkgs; [
-          clang-tools_16
+          clang-tools_17
           bear
         ];
 
